@@ -23,14 +23,15 @@ from xrspatial.classify import reclassify
 from grid import grid
 
 BASE_PRODUCT = "s2"
-DATASET_ID = "s2-cloudless"
+DATASET_ID = "cloudless"
 output_nodata = -32767
 
 
 class CloudlessProcessor(S2Processor):
     def process(self, xr: DataArray) -> DataArray:
         xr = super().process(xr)
-        median = xr.median("time").compute().to_dataset("band")
+        #median = xr.median("time").compute().to_dataset("band")
+        median = xr.resample(time="1Y").mean().squeeze()
         rgba = median.odc.to_rgba(bands=["B04", "B03", "B02"], vmin=0, vmax=1000)
         return set_stac_properties(xr, rgba)
 
