@@ -10,6 +10,8 @@ from dep_tools.azure import get_container_client
 
 from grid import grid
 
+from run_task import BASE_PRODUCT, DATASET_ID
+
 
 def main(
     regions: Annotated[str, typer.Option()],
@@ -17,7 +19,7 @@ def main(
     version: Annotated[str, typer.Option()],
     limit: Optional[str] = None,
     no_retry_errors: Optional[bool] = False,
-    dataset_id: str = "wofs",
+    dataset_id: str = DATASET_ID,
 ) -> None:
     region_codes = None if regions.upper() == "ALL" else regions.split(",")
 
@@ -32,7 +34,7 @@ def main(
         grid.loc[grid.code.isin(region_codes)] if region_codes is not None else grid
     )
 
-    itempath = DepItemPath("ls", dataset_id, version, datetime)
+    itempath = DepItemPath(BASE_PRODUCT, dataset_id, version, datetime)
     logger = CsvLogger(
         name=dataset_id,
         container_client=get_container_client(),
