@@ -1,14 +1,5 @@
-import ast
-import sys
-import warnings
-from typing import Optional
-
-import fsspec
-import geopandas as gpd
-import numpy as np
 import typer
-import xrspatial.multispectral as ms
-from azure_logger import CsvLogger, filter_by_log
+from azure_logger import CsvLogger
 from dep_tools.azure import get_container_client
 from dep_tools.loaders import Sentinel2OdcLoader
 from dep_tools.namers import DepItemPath
@@ -18,22 +9,21 @@ from dep_tools.stac_utils import set_stac_properties
 from dep_tools.writers import AzureDsWriter
 from typing_extensions import Annotated
 from xarray import DataArray
-from xrspatial.classify import reclassify
 
 from grid import grid
 
 BASE_PRODUCT = "s2"
 DATASET_ID = "cloudless"
-output_nodata = -32767
+OUTPUT_NODATA = 0
 
 
 class CloudlessProcessor(S2Processor):
     def process(self, xr: DataArray) -> DataArray:
         xr = super().process(xr)
-        # median = xr.median("time").compute().to_dataset("band")
-        median = xr.resample(time="1Y").mean().squeeze()
-        rgba = median.odc.to_rgba(bands=["B04", "B03", "B02"], vmin=0, vmax=1000)
-        return set_stac_properties(xr, rgba)
+        xr = xr.drop_sel(band="SCL")
+        median = xr.median(dim="time")
+        # rgba = median.odc.to_rgba(bands=["B04", "B03", "B02"], vmin=0, vmax=1000)
+        return set_stac_properties(xr, median)
 
 
 def main(
@@ -43,7 +33,7 @@ def main(
     version: Annotated[str, typer.Option()],
     dataset_id: str = DATASET_ID,
 ) -> None:
-    cell = grid.loc[[(region_code, region_index)]]
+    cell = grid.loc[[(region_index, region_code)]]
 
     loader = Sentinel2OdcLoader(
         epsg=3857,
@@ -52,7 +42,7 @@ def main(
         odc_load_kwargs=dict(
             fail_on_error=False,
             resolution=10,
-            bands=["B04", "B03", "B02"],
+            bands=["SCL", "B04", "B03", "B02"],
         ),
     )
 
@@ -62,7 +52,7 @@ def main(
     writer = AzureDsWriter(
         itempath=itempath,
         overwrite=False,
-        output_nodata=output_nodata,
+        output_nodata=OUTPUT_NODATA,
         extra_attrs=dict(dep_version=version),
     )
 
