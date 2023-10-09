@@ -21,7 +21,7 @@ class CloudlessProcessor(S2Processor):
     def process(self, xr: DataArray) -> DataArray:
         xr = super().process(xr)
         xr = xr.drop_sel(band="SCL")
-        median = xr.median(dim="time")
+        median = xr.median("time").compute().to_dataset("band")
         # rgba = median.odc.to_rgba(bands=["B04", "B03", "B02"], vmin=0, vmax=1000)
         return set_stac_properties(xr, median)
 
