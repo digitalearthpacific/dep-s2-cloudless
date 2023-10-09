@@ -1,0 +1,12 @@
+image: "ghcr.io/digitalearthpacific/dep-mangroves:0.0.1-32-gacc2deb"
+profile: r
+code: "src/"
+command:
+  - python
+  - run_task.py
+  - --region-code
+  - "FJ"
+  - --datetime
+  - "2023"
+  - --version
+  - "test"

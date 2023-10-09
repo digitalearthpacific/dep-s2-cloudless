@@ -1,0 +1,8 @@
+typer
+git+https://github.com/digitalearthpacific/dep-tools.git@a61e09a
+git+https://github.com/jessjaco/azure-logger.git@b23c9c7
+xarray-spatial
+odc-geo
+
+--no-binary gdal
+--no-binary rasterio
