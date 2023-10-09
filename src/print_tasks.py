@@ -5,11 +5,10 @@ from typing import Annotated, Optional
 
 import typer
 from azure_logger import CsvLogger, filter_by_log
-from dep_tools.namers import DepItemPath
 from dep_tools.azure import get_container_client
+from dep_tools.namers import DepItemPath
 
 from grid import grid
-
 from run_task import BASE_PRODUCT, DATASET_ID
 
 
@@ -31,7 +30,9 @@ def main(
         ValueError(f"{datetime} is not a valid value for --datetime")
 
     grid_subset = (
-        grid.loc[grid.code.isin(region_codes)] if region_codes is not None else grid
+        grid.loc[grid.country_code.isin(region_codes)]
+        if region_codes is not None
+        else grid
     )
 
     itempath = DepItemPath(BASE_PRODUCT, dataset_id, version, datetime)
