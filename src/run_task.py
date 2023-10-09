@@ -33,7 +33,7 @@ def main(
     version: Annotated[str, typer.Option()],
     dataset_id: str = DATASET_ID,
 ) -> None:
-    cell = grid.loc[[(region_index, region_code)]]
+    cell = grid.loc[[(region_code, region_index)]]
 
     loader = Sentinel2OdcLoader(
         epsg=3857,
