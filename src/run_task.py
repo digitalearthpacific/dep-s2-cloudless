@@ -34,15 +34,17 @@ def main(
     dataset_id: str = DATASET_ID,
 ) -> None:
     cell = grid.loc[[(region_code, region_index)]]
+    cell[["row", "column"]] = cell.tile_id.str.split(",", expand=True)
+    cell = cell.set_index(["row", "column"])
 
     loader = Sentinel2OdcLoader(
-        epsg=3857,
+        epsg=3832,
         datetime=datetime,
         dask_chunksize=dict(band=1, time=1, x=4096, y=4096),
         odc_load_kwargs=dict(
             fail_on_error=False,
             resolution=10,
-            bands=["SCL", "B04", "B03", "B02"],
+            bands=["SCL", "B04", "B03", "B02", "B08"],
         ),
     )
 
